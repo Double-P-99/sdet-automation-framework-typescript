@@ -1,0 +1,64 @@
+name: Regression — Full Suite
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # nightly at 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options: [staging, prod]
+
+jobs:
+  regression:
+    name: Full Regression Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps
+
+      - name: Start backend (staging uses docker-compose)
+        if: github.event.inputs.environment == 'staging' || github.event_name == 'schedule'
+        working-directory: backend
+        run: docker compose -f docker-compose.test.yml up -d --build
+
+      - name: Wait for services
+        run: |
+          timeout 90 bash -c 'until curl -sf http://localhost:8001/health && curl -sf http://localhost:8002/health; do sleep 3; done'
+
+      - name: Run full regression
+        env:
+          CI: true
+          AUTH_API_URL: http://localhost:8001
+          ORDERS_API_URL: http://localhost:8002
+          ORDERS_DB_URL: postgresql://postgres:postgres@localhost:5433/ordersdb
+          AUTH_DB_URL: postgresql://postgres:postgres@localhost:5433/authdb
+          CUSTOMER_EMAIL: customer@test.com
+          CUSTOMER_PASSWORD: Test@12345
+          ADMIN_EMAIL: admin@test.com
+          ADMIN_PASSWORD: Test@12345
+          BASE_URL: https://practicesoftwaretesting.com
+        run: |
+          npx playwright test \
+            --project=smoke \
+            --project=api \
+            --project=integration \
+            --reporter=html,github
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 30
