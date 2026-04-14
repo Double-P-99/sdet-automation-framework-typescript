@@ -1,0 +1,27 @@
+{
+  "name": "sdet-automation-framework-typescript",
+  "version": "1.0.0",
+  "description": "SDET Automation Framework — Playwright + TypeScript, POM architecture, multi-layer design",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:login": "playwright test tests/login",
+    "test:checkout": "playwright test tests/checkout",
+    "test:report": "playwright show-report",
+    "test:ci": "playwright test --reporter=github",
+    "lint": "eslint src tests --ext .ts",
+    "type-check": "tsc --noEmit",
+    "auth:setup": "playwright test tests/setup/auth.setup.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "dotenv": "^16.4.1",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  }
+}
