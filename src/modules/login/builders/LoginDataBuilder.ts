@@ -9,8 +9,8 @@ export interface LoginCredentials {
  */
 export class LoginDataBuilder {
   private data: LoginCredentials = {
-    email: process.env.CUSTOMER_EMAIL ?? 'customer@practicesoftwaretesting.com',
-    password: process.env.CUSTOMER_PASSWORD ?? 'welcome01',
+    email: process.env.UI_CUSTOMER_EMAIL ?? 'customer@practicesoftwaretesting.com',
+    password: process.env.UI_CUSTOMER_PASSWORD ?? 'welcome01',
   };
 
   withEmail(email: string): this {
@@ -30,8 +30,8 @@ export class LoginDataBuilder {
   }
 
   withAdminCredentials(): this {
-    this.data.email = process.env.ADMIN_EMAIL ?? 'admin@practicesoftwaretesting.com';
-    this.data.password = process.env.ADMIN_PASSWORD ?? 'welcome01';
+    this.data.email = process.env.UI_ADMIN_EMAIL ?? 'admin@practicesoftwaretesting.com';
+    this.data.password = process.env.UI_ADMIN_PASSWORD ?? 'welcome01';
     return this;
   }
 

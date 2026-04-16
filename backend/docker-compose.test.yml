@@ -7,17 +7,17 @@ services:
     image: postgres:16-alpine
     container_name: sdet_postgres_test
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_TEST_PORT:-5433}:5432"
     volumes:
       - ./db/init/01_init.sh:/docker-entrypoint-initdb.d/01_init.sh
     tmpfs:
       - /var/lib/postgresql/data  # In-memory for fast test resets
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 3s
       timeout: 3s
       retries: 15
@@ -28,12 +28,12 @@ services:
       dockerfile: Dockerfile
     container_name: sdet_auth_service_test
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/authdb
-      SECRET_KEY: test-secret-key-stable-for-integration-tests-32ch
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-test:5432/authdb
+      SECRET_KEY: ${SECRET_KEY_TEST:-test-secret-key-stable-for-integration-tests-32ch}
       ENVIRONMENT: test
       LOG_LEVEL: DEBUG
     ports:
-      - "8001:8001"
+      - "${AUTH_SERVICE_PORT:-8001}:8001"
     depends_on:
       postgres-test:
         condition: service_healthy
@@ -50,12 +50,12 @@ services:
       dockerfile: Dockerfile
     container_name: sdet_orders_service_test
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/ordersdb
-      SECRET_KEY: test-secret-key-stable-for-integration-tests-32ch
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-test:5432/ordersdb
+      SECRET_KEY: ${SECRET_KEY_TEST:-test-secret-key-stable-for-integration-tests-32ch}
       ENVIRONMENT: test
       LOG_LEVEL: DEBUG
     ports:
-      - "8002:8002"
+      - "${ORDERS_SERVICE_PORT:-8002}:8002"
     depends_on:
       postgres-test:
         condition: service_healthy

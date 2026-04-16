@@ -6,16 +6,16 @@ services:
     container_name: sdet_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-${POSTGRES_PORT}}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init/01_init.sh:/docker-entrypoint-initdb.d/01_init.sh
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -27,12 +27,12 @@ services:
     container_name: sdet_auth_service
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/authdb
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/authdb
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-minimum-32-chars}
       ENVIRONMENT: production
       LOG_LEVEL: INFO
     ports:
-      - "8001:8001"
+      - "${AUTH_SERVICE_PORT:-8001}:8001"
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,12 +50,12 @@ services:
     container_name: sdet_orders_service
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ordersdb
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/ordersdb
       SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-minimum-32-chars}
       ENVIRONMENT: production
       LOG_LEVEL: INFO
     ports:
-      - "8002:8002"
+      - "${ORDERS_SERVICE_PORT:-8002}:8002"
     depends_on:
       postgres:
         condition: service_healthy

@@ -7,8 +7,59 @@
 # ──────────────────────────────────────────────────────────────────────────────
 
 .PHONY: install up up-test down down-test logs logs-test health rebuild \
-        smoke api integration e2e test report debug ui \
-        type-check lint setup ci
+        smoke api integration e2e test test-all report debug ui \
+        type-check lint setup ci \
+        clean clean-test clean-all help
+
+# ── Help ──────────────────────────────────────────────────────────────────────
+
+## Show this help message
+help:
+	@echo ""
+	@echo "SDET Automation Framework — available targets"
+	@echo "────────────────────────────────────────────────────────────────"
+	@echo ""
+	@echo "  Setup"
+	@echo "    install        Install Node deps and Playwright browsers"
+	@echo ""
+	@echo "  Backend: dev stack (persistent volume)"
+	@echo "    up             Start PostgreSQL + Auth + Orders (:5432/:8001/:8002)"
+	@echo "    down           Stop dev containers"
+	@echo "    clean          Stop dev containers and delete volumes"
+	@echo "    logs           Tail dev stack logs"
+	@echo "    rebuild        Rebuild images and restart dev stack"
+	@echo ""
+	@echo "  Backend: test stack (ephemeral, tmpfs)"
+	@echo "    up-test        Start ephemeral stack (:5433/:8001/:8002)"
+	@echo "    down-test      Stop test containers"
+	@echo "    clean-test     Stop test containers and delete volumes"
+	@echo "    clean-all      Stop both stacks and delete all volumes"
+	@echo "    logs-test      Tail test stack logs"
+	@echo "    rebuild-test   Rebuild images and restart test stack"
+	@echo ""
+	@echo "  Health"
+	@echo "    health         Ping /health on both services"
+	@echo ""
+	@echo "  Tests"
+	@echo "    smoke          @smoke — fast availability gate (~5s)"
+	@echo "    api            API contract tests (auth + orders)"
+	@echo "    integration    Cross-service + DB validation tests"
+	@echo "    e2e            UI tests in Chromium"
+	@echo "    test           Run all Playwright projects"
+	@echo "    ui             Open Playwright interactive test runner"
+	@echo "    debug          Open Playwright step-by-step debugger"
+	@echo "    report         Open last HTML test report"
+	@echo "    setup          Run UI auth setup (saves browser state)"
+	@echo ""
+	@echo "  Code quality"
+	@echo "    type-check     TypeScript type check (no emit)"
+	@echo "    lint           ESLint on src/ and tests/"
+	@echo ""
+	@echo "  Compound"
+	@echo "    ci             up-test → smoke → api → integration → down-test"
+	@echo "    test-all       smoke → api → integration → e2e (stack must be up)"
+	@echo "    all            up → smoke → api → integration → e2e → report"
+	@echo ""
 
 # ── Setup ─────────────────────────────────────────────────────────────────────
 
@@ -27,6 +78,10 @@ up:
 down:
 	docker compose -f backend/docker-compose.yml down
 
+## Stop development containers and delete volumes (wipes DB data)
+clean:
+	docker compose -f backend/docker-compose.yml down -v
+
 ## Tail logs from the development stack
 logs:
 	docker compose -f backend/docker-compose.yml logs -f
@@ -44,6 +99,15 @@ up-test:
 ## Stop and remove ephemeral test containers
 down-test:
 	docker compose -f backend/docker-compose.test.yml down
+
+## Stop test containers and delete volumes
+clean-test:
+	docker compose -f backend/docker-compose.test.yml down -v
+
+## Stop and delete volumes from both stacks
+clean-all:
+	docker compose -f backend/docker-compose.yml down -v
+	docker compose -f backend/docker-compose.test.yml down -v
 
 ## Tail logs from the test stack
 logs-test:
@@ -121,6 +185,13 @@ ci: up-test
 	$(MAKE) api
 	$(MAKE) integration
 	$(MAKE) down-test
+
+## Run all test suites in order (stack must already be up)
+test-all:
+	$(MAKE) smoke
+	$(MAKE) api
+	$(MAKE) integration
+	$(MAKE) e2e
 
 ## Full local workflow against persistent dev stack
 all: up smoke api integration e2e report

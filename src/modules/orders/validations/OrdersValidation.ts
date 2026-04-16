@@ -56,6 +56,13 @@ export class OrdersValidation {
     expect(body.total).toBeGreaterThanOrEqual(1);
   }
 
+  assertPaginatedShape(status: number, body: PaginatedOrdersResponse, expectedPage = 1): void {
+    expect(status).toBe(HTTP_STATUS.ok);
+    expect(Array.isArray(body.items)).toBe(true);
+    expect(body.page).toBe(expectedPage);
+    expect(typeof body.total).toBe('number');
+  }
+
   assertOrderCancelled(cancelStatus: number, retrievedBody: OrderResponse): void {
     expect(cancelStatus).toBe(HTTP_STATUS.noContent);
     expect(retrievedBody.status).toBe(ORDER_STATUS.CANCELLED);

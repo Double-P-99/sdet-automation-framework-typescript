@@ -6,7 +6,8 @@ from decimal import Decimal
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.order import Order, OrderItem, OrderStatus, ORDER_STATUS_TRANSITIONS
+from app.models.order import Order, OrderStatus, ORDER_STATUS_TRANSITIONS
+from app.models.order_item import OrderItem
 from app.schemas.order import CreateOrderRequest, UpdateOrderStatusRequest
 
 logger = logging.getLogger(__name__)

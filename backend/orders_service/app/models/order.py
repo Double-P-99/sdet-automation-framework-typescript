@@ -2,8 +2,8 @@ import enum
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum as SAEnum, Numeric, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import ENUM as PGEnum, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -35,7 +35,9 @@ class Order(Base):
     )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     status: Mapped[OrderStatus] = mapped_column(
-        SAEnum(OrderStatus), nullable=False, default=OrderStatus.PENDING
+        PGEnum(OrderStatus, name="order_status", create_type=False, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=OrderStatus.PENDING,
     )
     total_amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="USD")

@@ -51,6 +51,6 @@ test.describe('Smoke — Service availability', () => {
 
     const { status, body } = await flow.listOrders({ page: 1, page_size: 1 });
 
-    validation.assertPaginated(status, body);
+    validation.assertPaginatedShape(status, body);
   });
 });

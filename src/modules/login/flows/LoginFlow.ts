@@ -29,15 +29,15 @@ export class LoginFlow {
 
   async loginAsCustomer(): Promise<void> {
     await this.loginWithCredentials({
-      email: process.env.CUSTOMER_EMAIL ?? 'customer@practicesoftwaretesting.com',
-      password: process.env.CUSTOMER_PASSWORD ?? 'welcome01',
+      email: process.env.UI_CUSTOMER_EMAIL ?? 'customer@practicesoftwaretesting.com',
+      password: process.env.UI_CUSTOMER_PASSWORD ?? 'welcome01',
     });
   }
 
   async loginAsAdmin(): Promise<void> {
     await this.loginWithCredentials({
-      email: process.env.ADMIN_EMAIL ?? 'admin@practicesoftwaretesting.com',
-      password: process.env.ADMIN_PASSWORD ?? 'welcome01',
+      email: process.env.UI_ADMIN_EMAIL ?? 'admin@practicesoftwaretesting.com',
+      password: process.env.UI_ADMIN_PASSWORD ?? 'welcome01',
     });
   }
 
